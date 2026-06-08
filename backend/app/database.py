@@ -2,11 +2,26 @@
 数据库连接管理
 使用 SQLAlchemy 2.0 引擎和会话工厂
 """
+import socket
+from urllib.parse import urlparse
+
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import get_settings
 
 settings = get_settings()
+
+
+def _resolve_ipv4(hostname: str) -> str | None:
+    """Resolve hostname to an IPv4 address for environments without IPv6."""
+    try:
+        addrs = socket.getaddrinfo(hostname, None, socket.AF_INET, socket.SOCK_STREAM)
+        if addrs:
+            return addrs[0][4][0]
+    except Exception:
+        pass
+    return None
+
 
 # 创建数据库引擎
 # SQLite需要check_same_thread=False以支持FastAPI异步调用
@@ -17,7 +32,14 @@ if "sqlite" in settings.database_url:
         echo=False,  # 生产环境关闭SQL日志
     )
 else:
-    engine = create_engine(settings.database_url, echo=False)
+    connect_args = {}
+    url = urlparse(settings.database_url)
+    hostname = url.hostname
+    if hostname:
+        ipv4 = _resolve_ipv4(hostname)
+        if ipv4:
+            connect_args["hostaddr"] = ipv4
+    engine = create_engine(settings.database_url, connect_args=connect_args, echo=False)
 
 # 会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
