@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: rlzp-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://postgres:W2skh5dZcHzTIFi9@db.ajvugpoglclbkymgqoer.supabase.co:5432/postgres
+      - key: SECRET_KEY
+        value: 1wLuAEMidNEuH-L7tycuN3a4JW_76MW-XTSAlRDFaTQ
+      - key: CREDENTIAL_ENCRYPTION_KEY
+        value: 3wZNjN-5Z0_y_UUb0weUJFarZ6MmecS4d-2mXAcR-Qc
+      - key: JWT_EXPIRE_DAYS
+        value: "7"
+      - key: ALLOW_PUBLIC_REGISTRATION
+        value: "true"
+      - key: SECURE_COOKIES
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: ALLOW_PRIVATE_NETWORK_URLS
+        value: "false"
+      - key: AI_ENDPOINT
+        value: https://api.deepseek.com/v1
+      - key: AI_API_KEY
+        value: ""
+      - key: AI_MODEL
+        value: deepseek-chat
+      - key: ALLOW_AI_ENV_FALLBACK
+        value: "false"
+      - key: CORS_ORIGINS
+        value: https://rlzp-d2g1q3sa247f84e3e-1324232839.tcloudbaseapp.com
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "20"
