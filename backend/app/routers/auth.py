@@ -84,7 +84,7 @@ def register(req: RegisterRequest, request: Request, response: Response, db: Ses
         username=user.username,
         email=user.email,
         company_name=user.company_name,
-        token=""
+        token=token
     )
 
 
@@ -114,7 +114,7 @@ def login(req: LoginRequest, request: Request, response: Response, db: Session =
         username=user.username,
         email=user.email,
         company_name=user.company_name,
-        token=""
+        token=token
     )
 
 

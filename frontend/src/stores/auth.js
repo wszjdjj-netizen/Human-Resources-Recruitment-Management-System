@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 行动
   async function login(username, password) {
     const res = await loginApi(username, password)
-    token.value = ''
+    token.value = res.token || ''
     user.value = { id: res.id, username: res.username, email: res.email, company_name: res.company_name }
     checked.value = true
     return res
@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function register(data) {
     const res = await registerApi(data)
-    token.value = ''
+    token.value = res.token || ''
     user.value = { id: res.id, username: res.username, email: res.email, company_name: res.company_name }
     checked.value = true
     return res

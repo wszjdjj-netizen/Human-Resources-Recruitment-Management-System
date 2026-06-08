@@ -22,7 +22,7 @@ services:
       - key: SECURE_COOKIES
         value: "true"
       - key: COOKIE_SAMESITE
-        value: none
+        value: lax
       - key: ALLOW_PRIVATE_NETWORK_URLS
         value: "false"
       - key: AI_ENDPOINT
