@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Prefer IPv4 over IPv6 (Render free tier has no IPv6 connectivity)
+RUN echo "precedence ::ffff:0:0/96  100" >> /etc/gai.conf
+
 COPY requirements-cloudrun.txt .
 RUN pip install --no-cache-dir -r requirements-cloudrun.txt
 
