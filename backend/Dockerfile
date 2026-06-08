@@ -25,4 +25,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["sh", "-c", "python -c \"from app.config import get_settings; s=get_settings(); print(f'ENV={s.environment} DB={s.database_url[:50]}...')\" && uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info 2>&1"
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
