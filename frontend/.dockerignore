@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.production
+node_modules/
+dist/
+npm-version.err
+.temp/
+.eslintcache
+*.log

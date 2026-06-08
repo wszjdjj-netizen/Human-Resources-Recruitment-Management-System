@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:16-alpine
+    container_name: recruitment-db
+    environment:
+      POSTGRES_DB: recruitment
+      POSTGRES_USER: recruitment_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recruitment_user -d recruitment"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.full
+    container_name: recruitment-backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DATABASE_URL: postgresql://recruitment_user:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/recruitment
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?set CREDENTIAL_ENCRYPTION_KEY in .env}
+      ALLOW_PUBLIC_REGISTRATION: ${ALLOW_PUBLIC_REGISTRATION:-false}
+      REGISTRATION_INVITE_CODE: ${REGISTRATION_INVITE_CODE:-}
+      AI_ENDPOINT: ${AI_ENDPOINT}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL}
+      ALLOW_AI_ENV_FALLBACK: ${ALLOW_AI_ENV_FALLBACK:-false}
+      ALLOW_PRIVATE_NETWORK_URLS: ${ALLOW_PRIVATE_NETWORK_URLS:-false}
+      RUNNER_TOKEN_TTL_MINUTES: ${RUNNER_TOKEN_TTL_MINUTES:-30}
+      MAX_RUNNER_SCREENSHOT_SIZE_MB: ${MAX_RUNNER_SCREENSHOT_SIZE_MB:-5}
+      SECURE_COOKIES: ${SECURE_COOKIES:-true}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-}
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/logs:/app/logs
+    expose:
+      - "8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: recruitment-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
