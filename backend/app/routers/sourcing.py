@@ -155,7 +155,12 @@ RUNNER_PACKAGE_FILES = [
 
 
 def _project_root() -> Path:
-    return Path(__file__).resolve().parents[3]
+    this_file = Path(__file__).resolve()
+    root = this_file.parents[3]
+    # In Docker container the app lives at /app, not repo root
+    if str(root) == "/":
+        return this_file.parents[2]
+    return root
 
 
 def _runner_package_readme() -> str:

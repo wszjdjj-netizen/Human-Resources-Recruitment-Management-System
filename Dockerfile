@@ -14,7 +14,12 @@ RUN pip install --no-cache-dir -r requirements-cloudrun.txt
 
 COPY backend/ .
 
-RUN mkdir -p uploads logs \
+COPY start-local-runner.bat .
+COPY register-runner-protocol.bat .
+COPY register-runner-protocol.ps1 .
+
+RUN ln -sfn /app /app/backend \
+    && mkdir -p uploads logs \
     && useradd -m appuser \
     && chown -R appuser:appuser /app
 
