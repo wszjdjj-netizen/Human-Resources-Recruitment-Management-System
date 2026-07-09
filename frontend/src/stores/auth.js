@@ -2,10 +2,20 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login as loginApi, register as registerApi, getMe, logout as logoutApi, updateMe } from '../api/auth'
 
+const TOKEN_KEY = 'auth_token'
+
+function persistToken(t) {
+  if (t) {
+    localStorage.setItem(TOKEN_KEY, t)
+  } else {
+    localStorage.removeItem(TOKEN_KEY)
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // 状态
   const user = ref(null)
-  const token = ref('')
+  const token = ref(localStorage.getItem(TOKEN_KEY) || '')
   const checked = ref(false)
 
   // 计算属性
@@ -16,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 行动
   async function login(username, password) {
     const res = await loginApi(username, password)
-    token.value = res.token || ''
+    persistToken(res.token || '')
     user.value = { id: res.id, username: res.username, email: res.email, company_name: res.company_name }
     checked.value = true
     return res
@@ -24,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function register(data) {
     const res = await registerApi(data)
-    token.value = res.token || ''
+    persistToken(res.token || '')
     user.value = { id: res.id, username: res.username, email: res.email, company_name: res.company_name }
     checked.value = true
     return res
@@ -37,7 +47,6 @@ export const useAuthStore = defineStore('auth', () => {
       checked.value = true
       return true
     } catch {
-      // token过期或无效，清除登录状态
       clearClientAuth()
       checked.value = true
       return false
@@ -45,13 +54,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function ensureAuth() {
-    if (isLoggedIn.value) return true
-    if (checked.value) return false
+    if (checked.value) return !!user.value
     return fetchMe()
   }
 
   function clearClientAuth() {
-    token.value = ''
+    persistToken('')
     user.value = null
   }
 
