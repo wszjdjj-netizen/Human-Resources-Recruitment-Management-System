@@ -4,26 +4,24 @@ import { login as loginApi, register as registerApi, getMe, logout as logoutApi,
 
 const TOKEN_KEY = 'auth_token'
 
-function persistToken(t) {
-  if (t) {
-    localStorage.setItem(TOKEN_KEY, t)
-  } else {
-    localStorage.removeItem(TOKEN_KEY)
-  }
-}
-
 export const useAuthStore = defineStore('auth', () => {
-  // 状态
   const user = ref(null)
   const token = ref(localStorage.getItem(TOKEN_KEY) || '')
   const checked = ref(false)
 
-  // 计算属性
+  function persistToken(t) {
+    if (t) {
+      localStorage.setItem(TOKEN_KEY, t)
+    } else {
+      localStorage.removeItem(TOKEN_KEY)
+    }
+    token.value = t
+  }
+
   const isLoggedIn = computed(() => !!token.value || !!user.value)
   const username = computed(() => user.value?.username || '')
   const companyName = computed(() => user.value?.company_name || '')
 
-  // 行动
   async function login(username, password) {
     const res = await loginApi(username, password)
     persistToken(res.token || '')
@@ -68,9 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
     checked.value = true
     try {
       await logoutApi()
-    } catch {
-      // 本地状态已经清理，服务端清理失败不阻塞退出
-    }
+    } catch { }
   }
 
   async function updateProfile(data) {
@@ -80,17 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    user,
-    token,
-    checked,
-    isLoggedIn,
-    username,
-    companyName,
-    login,
-    register,
-    fetchMe,
-    ensureAuth,
-    updateProfile,
-    logout
+    user, token, checked, isLoggedIn, username, companyName,
+    login, register, fetchMe, ensureAuth, updateProfile, logout
   }
 })
